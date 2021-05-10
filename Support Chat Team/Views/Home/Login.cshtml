@@ -1,0 +1,29 @@
+﻿
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.14/signalr.min.js" integrity="sha512-z1IHuM5a2zYLnhWvPGXxTgfLQVqrFpWSuBsYbWpDtus0FLa0ZCbCuMylKDhVx+L3xRjUfP0Mnzgt1ROpExTDrg==" crossorigin="anonymous"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script type="text/javascript">
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/Tor')
+            .build();
+        connection.on("Welcome", Helloworld);
+        connection.on("AdminMsg", Admin);
+        function Admin(name, text) {
+            alert(name + "     " + text);
+        }
+        function Helloworld(name) {
+            alert(name);
+        }
+        $(document).ready(async function () {
+            await connection.start();
+            connection.invoke("remove");
+        });
+        window.addEventListener('beforeunload', function (e) {
+            connection.stop();
+        });
+    </script>
+
+</head>
+
+</html>

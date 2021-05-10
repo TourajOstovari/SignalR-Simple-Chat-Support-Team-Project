@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.14/signalr.min.js" integrity="sha512-z1IHuM5a2zYLnhWvPGXxTgfLQVqrFpWSuBsYbWpDtus0FLa0ZCbCuMylKDhVx+L3xRjUfP0Mnzgt1ROpExTDrg==" crossorigin="anonymous"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script>
+        var con = new signalR.HubConnectionBuilder()
+            .withUrl('/Tor')
+            .build();
+        con.on("Welcome", Helloworld);
+        con.on("OnlineAdmins", OnlineAdmins);
+        $(document).ready(function () {
+            $("#StartChat").click(async function (e) {
+                e.preventDefault();
+                await con.start();
+                setInterval(CheckAdmin, 2000);
+                jQuery("#InfoGroup").hide("fast");
+            });
+            document.getElementById("Send").addEventListener("click", function (e) {
+                e.preventDefault();
+                var doms = document.getElementById("chatscreen").lastChild;
+                $(doms).after("<br/><p id=\"chatscreen\" class=\"form-control float-md-left text-left\">" + $("#ClientName").val() + ": " + $('#Send_text').val() + " </p >");
+                con.invoke("sendMSG", jQuery("#ClientName").val(), $('#Send_text').val());
+            });
+        });
+        function OnlineAdmins(count)
+        {
+            document.getElementById("admins").innerText = count;
+        }
+
+
+        function Helloworld(messages) {
+            alert(messages + "   " + jQuery("#ClientName").val());
+        }
+        function CheckAdmin() {
+            con.invoke("Checkadmin");
+        }
+    </script>
+</head>
+<div class="text-center">
+    <p>Online Admins:</p>
+    <p id="admins">0</p>
+    <h1 class="display-4">Welcome to chat support App ... Developed and designed by Mr. Touraj ostovari</h1>
+    <div class="form-group" id="InfoGroup">
+        <p class="form-control">Enter your name: </p>
+        <input id="ClientName" type="text" class="input-group" placeholder="E.g: Tor" /><br />
+        <input type="submit" class="input-group bg-info" id="StartChat"/>
+    </div>
+    <div class="form-group container" style="glyph-orientation-vertical:auto; vertical-align:auto; height:900px">
+        <div style="height:500px; background-color:aqua;overflow:scroll;">
+            <p id="chatscreen" class="form-control float-md-left text-left">
+                Chat Screen: <br/>
+            </p>
+        </div>
+        <input id="Send_text" type="text" class="form-control" />
+        <input id="Send" type="submit" class="form-control bg-primary" onclick="Send()" style="color:white;"/>
+    </div>
+</div>
